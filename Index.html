@@ -1,197 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monthly Budgeting Calculator</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; background: #f9f9f9; color: #333; }
-  main { max-width: 700px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  section { margin-bottom: 40px; }
-  h1,h2 { text-align:center; margin-bottom:15px; }
-  label { display:block; margin-top:10px; font-weight:bold; }
-  input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; }
-  button { margin-top:15px; padding:10px; width:100%; font-size:16px; border:none; border-radius:5px; cursor:pointer; transition:0.3s; }
-  button:hover { opacity:0.9; }
-  .result { margin-top:20px; padding:15px; background:#f0f8ff; border-radius:5px; }
-  .kpi { margin-bottom:10px; }
-  .muted { color:#777; font-size:14px; }
-  canvas { margin-top:15px; max-width:100%; }
-  .footer-note { opacity:0; transition:0.8s ease-in-out; font-size:14px; color:#666; margin-top:10px; }
-  .footer-note.show { opacity:1; }
-  footer { text-align:center; margin-top:40px; font-size:14px; color:#555; }
-  .btn-calc { background:#4CAF50; color:#fff; }
-  .btn-download { background:#2196F3; color:#fff; }
-  .btn-reset { background:#f44336; color:#fff; }
-</style>
-<!-- Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- html2pdf library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Budgeting Calculator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-<main>
-<h1>Monthly Budgeting Calculator</h1>
+  <div class="container">
+    <h1>Monthly Budgeting Calculator</h1>
 
-<!-- STEP 1: Income -->
-<section>
-<h2>Step 1: Income</h2>
-<label for="hourlyPay">Hourly Pay ($)</label>
-<input type="number" id="hourlyPay" min="0" step="0.01">
-<label for="weeklyHours">Hours Worked per Week</label>
-<input type="number" id="weeklyHours" min="0">
-<label for="taxRate">Tax Deduction (%)</label>
-<input type="number" id="taxRate" min="0" max="100">
-<button class="btn-calc" onclick="calcIncome()">Calculate Net Biweekly Pay</button>
+    <!-- Income Section -->
+    <div class="section">
+      <h2>Income</h2>
+      <label>Hourly Pay ($): <input type="number" id="hourlyPay" step="0.01"></label>
+      <label>Hours per Week: <input type="number" id="hoursPerWeek"></label>
+      <label>Tax Deduction (%): <input type="number" id="taxPercent" step="0.1"></label>
+      <button onclick="calculateIncome()">Calculate Net Pay</button>
+      <div id="incomeResults"></div>
+    </div>
 
-<div id="incomeResults" class="result" style="display:none;"></div>
-<p id="incomeDisclaimer" class="footer-note">
-⚠️ This calculator shows estimated take-home pay after taxes only. It does not subtract benefits such as health insurance or retirement contributions.
-</p>
-</section>
+    <!-- Expense Section -->
+    <div class="section">
+      <h2>Expenses (Biweekly)</h2>
+      <div id="expenseList"></div>
+      <button onclick="addExpense()">+ Add Expense</button>
+      <button onclick="calculateBudget()">Calculate Budget</button>
+      <div id="budgetResults"></div>
+      <canvas id="budgetChart"></canvas>
+    </div>
 
-<!-- STEP 2: Expenses -->
-<section>
-<h2>Step 2: Expenses</h2>
-<p class="muted">
-Enter your expenses for a <b>typical biweekly period</b>. The calculator will project your <b>monthly budget</b>.
-</p>
-<label for="rent">Rent/Mortgage ($)</label><input type="number" id="rent" min="0">
-<label for="utilities">Utilities ($)</label><input type="number" id="utilities" min="0">
-<label for="transport">Transportation ($)</label><input type="number" id="transport" min="0">
-<label for="insurance">Insurance ($)</label><input type="number" id="insurance" min="0">
-<label for="groceries">Groceries ($)</label><input type="number" id="groceries" min="0">
-<label for="debt">Debt Payments ($)</label><input type="number" id="debt" min="0">
-<label for="subs">Subscriptions ($)</label><input type="number" id="subs" min="0">
-<label for="savings">Savings Goals ($)</label><input type="number" id="savings" min="0">
-<label for="fun">Discretionary Spending ($)</label><input type="number" id="fun" min="0">
-<button class="btn-calc" onclick="calcBudget()">Calculate Monthly Budget</button>
+    <!-- Action Buttons -->
+    <div class="section">
+      <button onclick="downloadReport()">📥 Download PDF</button>
+      <button onclick="resetAll()">🔄 Reset All</button>
+    </div>
 
-<div id="budgetResults" class="result" style="display:none;">
-<div class="kpi"><span class="muted">Total Monthly Expenses</span> <b id="totalExp">$0.00</b></div>
-<div class="kpi"><span class="muted">Leftover (or Shortfall)</span> <b id="leftover">$0.00</b></div>
-<canvas id="budgetChart"></canvas>
-</div>
+    <footer>
+      <p>Created by Davi Nevae LLC</p>
+    </footer>
+  </div>
 
-<button class="btn-download" onclick="downloadReport()">Download Report as PDF</button>
-<button class="btn-reset" onclick="resetAll()">Reset All Fields</button>
-</section>
-
-<footer>
-&copy; 2025 Davi Nevae LLC. All rights reserved.
-</footer>
-</main>
-
-<script>
-let storedNetBi = 0;
-let chart;
-
-function $(id){ return document.getElementById(id); }
-
-function calcIncome(){
-  const hourly = parseFloat($('hourlyPay').value) || 0;
-  const weeklyHours = parseFloat($('weeklyHours').value) || 0;
-  const taxRate = parseFloat($('taxRate').value) || 0;
-
-  if(hourly<=0||weeklyHours<=0){ alert("Please enter valid hourly pay and weekly hours."); return; }
-
-  const grossBiweekly = hourly * weeklyHours * 2;
-  const taxAmount = grossBiweekly * (taxRate/100);
-  const netBiweekly = grossBiweekly - taxAmount;
-  const monthlyNet = netBiweekly * 2;
-
-  $('incomeResults').style.display='block';
-  $('incomeResults').innerHTML = `
-    <div class="kpi"><span class="muted">Gross Biweekly Pay</span> <b>$${grossBiweekly.toFixed(2)}</b></div>
-    <div class="kpi"><span class="muted">Taxes Deducted</span> <b>$${taxAmount.toFixed(2)}</b></div>
-    <div class="kpi"><span class="muted">Net Biweekly (Take-Home)</span> <b>$${netBiweekly.toFixed(2)}</b></div>
-    <div class="kpi"><span class="muted">Projected Monthly Take-Home</span> <b style="color:blue;">$${monthlyNet.toFixed(2)}</b></div>
-  `;
-  $('incomeDisclaimer').classList.add('show');
-  storedNetBi = netBiweekly;
-}
-
-function calcBudget(){
-  if(storedNetBi===0){ alert("Please calculate your income first."); return; }
-
-  const rent = parseFloat($('rent').value)||0;
-  const utils = parseFloat($('utilities').value)||0;
-  const trans = parseFloat($('transport').value)||0;
-  const ins = parseFloat($('insurance').value)||0;
-  const groceries = parseFloat($('groceries').value)||0;
-  const debt = parseFloat($('debt').value)||0;
-  const subs = parseFloat($('subs').value)||0;
-  const savings = parseFloat($('savings').value)||0;
-  const fun = parseFloat($('fun').value)||0;
-
-  const totalExpenses = (rent+utils+trans+ins+groceries+debt+subs+savings+fun)*2; // monthly
-  const leftover = (storedNetBi*2) - totalExpenses;
-
-  $('totalExp').textContent="$"+totalExpenses.toFixed(2);
-  $('leftover').textContent="$"+leftover.toFixed(2);
-  $('leftover').style.color=leftover>=0?"green":"red";
-  $('budgetResults').style.display='block';
-
-  const ctx = $('budgetChart').getContext('2d');
-  if(chart) chart.destroy();
-  chart = new Chart(ctx,{
-    type:'pie',
-    data:{
-      labels:['Expenses','Leftover'],
-      datasets:[{data:[totalExpenses,leftover>0?leftover:0],backgroundColor:['#ff9999','#99ff99'] }]
-    }
-  });
-
-  if(leftover<0){ alert("Warning: Your expenses exceed your monthly income!"); }
-}
-
-function downloadReport(){
-  const element = document.createElement('div');
-  element.innerHTML = `
-    <h1>Monthly Budgeting Report</h1>
-    ${$('incomeResults').innerHTML}
-    ${$('budgetResults').innerHTML}
-  `;
-
-  // Convert chart to image
-  const chartCanvas = $('budgetChart');
-  const chartImage = chartCanvas.toDataURL('image/png', 1.0);
-  const clonedChart = element.querySelector('#budgetChart');
-  if(clonedChart){
-    const imgEl = document.createElement('img');
-    imgEl.src = chartImage;
-    imgEl.style.width = '100%';
-    clonedChart.parentNode.replaceChild(imgEl, clonedChart);
-  }
-
-  const opt = {
-    margin: 10,
-    filename: 'Budgeting_Report.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(element).save();
-}
-
-function resetAll(){
-  // Clear all inputs
-  const inputs = document.querySelectorAll('input');
-  inputs.forEach(input => input.value = '');
-
-  // Hide results
-  $('incomeResults').style.display='none';
-  $('budgetResults').style.display='none';
-  $('incomeDisclaimer').classList.remove('show');
-
-  // Reset stored income and chart
-  storedNetBi = 0;
-  if(chart) chart.destroy();
-
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
