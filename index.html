@@ -3,48 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Monthly Budgeting Calculator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <title>Your New Budgeting Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      margin: 20px;
       background: #f9f9f9;
+      color: #333;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #444;
+    }
+    .intro, .instructions {
+      max-width: 700px;
+      margin: 0 auto 20px auto;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
-      background: #fff;
       padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-      text-align: center;
-    }
-    .section {
-      margin-bottom: 30px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     label {
       display: block;
-      margin: 10px 0;
+      margin: 10px 0 5px;
     }
     input {
-      margin-left: 10px;
-      padding: 5px;
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
-      margin: 10px 5px 0 0;
       padding: 10px 15px;
+      margin: 5px;
       border: none;
+      border-radius: 4px;
       background: #4CAF50;
       color: white;
-      border-radius: 4px;
       cursor: pointer;
     }
     button:hover {
       background: #45a049;
+    }
+    .results, .table-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fafafa;
+      border-radius: 6px;
     }
     table {
       width: 100%;
@@ -53,196 +67,214 @@
     }
     table, th, td {
       border: 1px solid #ddd;
-    }
-    th, td {
-      padding: 10px;
       text-align: center;
+      padding: 10px;
     }
     th {
-      background-color: #f2f2f2;
+      background: #f2f2f2;
+    }
+    small {
+      font-size: 0.9em;
+      color: #777;
     }
     footer {
       text-align: center;
-      margin-top: 40px;
-      font-size: 0.9em;
+      margin-top: 30px;
       color: #777;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Monthly Budgeting Calculator</h1>
 
-    <!-- Income Section -->
-    <div class="section">
-      <h2>Income</h2>
-      <label>Hourly Pay ($): <input type="number" id="hourlyPay" step="0.01"></label>
-      <label>Hours per Week: <input type="number" id="hoursPerWeek"></label>
-      <label>Tax Deduction (%): <input type="number" id="taxPercent" step="0.1"></label>
-      <button onclick="calculateIncome()">Calculate Net Pay</button>
-      <div id="incomeResults"></div>
-    </div>
+  <h1>Your New Budgeting Calculator</h1>
 
-    <!-- Expense Section -->
-    <div class="section">
-      <h2>Expenses (Biweekly)</h2>
-      <div id="expenseList"></div>
-      <button onclick="addExpense()">+ Add Expense</button>
-      <button onclick="calculateBudget()">Calculate Budget</button>
-      <div id="budgetResults"></div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="section">
-      <button onclick="downloadReport()">📥 Download PDF</button>
-      <button onclick="downloadCSV()">📊 Download CSV</button>
-      <button onclick="resetAll()">🔄 Reset All</button>
-    </div>
-
-    <footer>
-      <p>Created by Davi Nevae LLC</p>
-    </footer>
+  <div class="intro">
+    <p>Welcome! This calculator helps you estimate your <b>biweekly take-home pay</b> and organize your <b>expenses</b>. 
+    It uses a simple tax percentage deduction (default 22%) and does not include insurance, retirement, or other benefits. 
+    The goal: give you a clear picture of how many hours you need to work to cover your bills.</p>
   </div>
 
+  <div class="instructions">
+    <h3>How to Use:</h3>
+    <ol>
+      <li>Enter your <b>hourly pay</b> and <b>hours worked per week</b>.</li>
+      <li>Add your <b>tax %</b>, or leave blank to use the <b>default 22%</b>.</li>
+      <li>Click <b>“Calculate Net Pay”</b> to see your biweekly income.</li>
+      <li>Fill in your <b>expenses</b> (Rent, Utilities, Other are already listed — add more as needed).</li>
+      <li>Click <b>“Calculate Budget”</b> to view totals and hours needed to cover bills.</li>
+      <li>Download results as <b>PDF</b> or <b>CSV</b>, or reset to start over.</li>
+    </ol>
+  </div>
+
+  <div class="container">
+    <h2>Income Details</h2>
+    <label for="hourlyPay">Hourly Pay ($):</label>
+    <input type="number" id="hourlyPay" placeholder="e.g., 20">
+
+    <label for="hoursPerWeek">Hours Worked Per Week:</label>
+    <input type="number" id="hoursPerWeek" placeholder="e.g., 40">
+
+    <label for="taxRate">Tax Percentage (%):</label>
+    <input type="number" id="taxRate" placeholder="Default 22%">
+    <small>If unsure, leave blank — the calculator will use 22%. 
+    This is a simple estimate and does not include benefits (like insurance or retirement).</small>
+
+    <br><br>
+    <button onclick="calculatePay()">Calculate Net Pay</button>
+    <button onclick="resetAll()">Reset All</button>
+
+    <div id="payResults" class="results" style="display:none;"></div>
+
+    <h2>Expenses</h2>
+    <div id="expenses">
+      <div>
+        <input type="text" placeholder="Expense name (e.g., Rent)" class="expense-name" value="Rent">
+        <input type="number" placeholder="Amount ($)" class="expense-amount">
+      </div>
+      <div>
+        <input type="text" placeholder="Expense name (e.g., Utilities)" class="expense-name" value="Utilities">
+        <input type="number" placeholder="Amount ($)" class="expense-amount">
+      </div>
+      <div>
+        <input type="text" placeholder="Expense name (e.g., Other)" class="expense-name" value="Other">
+        <input type="number" placeholder="Amount ($)" class="expense-amount">
+      </div>
+    </div>
+    <button onclick="addExpense()">+ Add Another Expense</button>
+    <button onclick="calculateBudget()">Calculate Budget</button>
+
+    <div id="budgetResults" class="table-section" style="display:none;"></div>
+
+    <div class="export-buttons" style="margin-top:15px;">
+      <button onclick="downloadPDF()">Download PDF</button>
+      <button onclick="downloadCSV()">Download CSV</button>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Biweekly Budgeting Calculator | Built by <a href="https://www.davinevae.com" target="_blank">Davi Nevae LLC</a> | All Rights Reserved
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const $ = id => document.getElementById(id);
+    let grossPay = 0;
+    let netPay = 0;
+    let hoursPerWeek = 0;
 
-    // Add expense row
+    function calculatePay() {
+      const hourlyPay = parseFloat(document.getElementById('hourlyPay').value) || 0;
+      hoursPerWeek = parseFloat(document.getElementById('hoursPerWeek').value) || 0;
+      const taxRate = parseFloat(document.getElementById('taxRate').value) || 22;
+
+      grossPay = hourlyPay * hoursPerWeek * 2;
+      const taxAmount = grossPay * (taxRate / 100);
+      netPay = grossPay - taxAmount;
+
+      const payResults = document.getElementById('payResults');
+      payResults.style.display = 'block';
+      payResults.innerHTML = `
+        <p><b>Gross Pay (Biweekly):</b> $${grossPay.toFixed(2)}</p>
+        <p><b>Estimated Taxes (${taxRate}%):</b> $${taxAmount.toFixed(2)}</p>
+        <p><b>Net Pay (Biweekly):</b> $${netPay.toFixed(2)}</p>
+        <small><i>Note: This does not include insurance, retirement, or other benefit deductions.</i></small>
+      `;
+    }
+
     function addExpense() {
-      const container = $('expenseList');
+      const expensesDiv = document.getElementById('expenses');
       const div = document.createElement('div');
-      div.classList.add('expenseRow');
       div.innerHTML = `
-        <label>Description: <input type="text" class="desc"></label>
-        <label>Amount ($): <input type="number" class="amount" step="0.01"></label>
+        <input type="text" placeholder="Expense name (e.g., Internet)" class="expense-name">
+        <input type="number" placeholder="Amount ($)" class="expense-amount">
       `;
-      container.appendChild(div);
+      expensesDiv.appendChild(div);
     }
 
-    // Calculate income
-    function calculateIncome() {
-      const hourly = parseFloat($('hourlyPay').value) || 0;
-      const hours = parseFloat($('hoursPerWeek').value) || 0;
-      const tax = (parseFloat($('taxPercent').value) || 0) / 100;
-
-      const gross = hourly * hours * 2; // biweekly gross
-      const net = gross * (1 - tax);
-
-      $('incomeResults').innerHTML = `
-        <p><b>Gross Pay (Biweekly):</b> $${gross.toFixed(2)}</p>
-        <p><b>Net Pay (Biweekly):</b> $${net.toFixed(2)}</p>
-        <p><i>*Does not include benefits (insurance, retirement, etc.)</i></p>
-      `;
-    }
-
-    // Calculate budget and required hours
     function calculateBudget() {
-      const hourly = parseFloat($('hourlyPay').value) || 0;
-      const tax = (parseFloat($('taxPercent').value) || 0) / 100;
-      const netHourly = hourly * (1 - tax);
+      const names = document.getElementsByClassName('expense-name');
+      const amounts = document.getElementsByClassName('expense-amount');
 
-      const descs = [...document.querySelectorAll('.desc')].map(el => el.value || 'Unnamed');
-      const amounts = [...document.querySelectorAll('.amount')].map(el => parseFloat(el.value) || 0);
-      const totalBiweekly = amounts.reduce((a, b) => a + b, 0);
-      const totalMonthly = totalBiweekly * 2;
-
-      let tableHTML = `
-        <table>
-          <tr><th>Description</th><th>Biweekly ($)</th><th>Monthly ($)</th></tr>
-      `;
-
-      amounts.forEach((amt, i) => {
-        tableHTML += `
-          <tr>
-            <td>${descs[i]}</td>
-            <td>${amt.toFixed(2)}</td>
-            <td>${(amt * 2).toFixed(2)}</td>
-          </tr>
-        `;
-      });
-
-      tableHTML += `
-        <tr>
-          <th>Total</th>
-          <th>$${totalBiweekly.toFixed(2)}</th>
-          <th>$${totalMonthly.toFixed(2)}</th>
-        </tr>
-        </table>
-      `;
-
-      // Calculate required work hours
-      let hoursBiweekly = netHourly > 0 ? (totalBiweekly / netHourly) : 0;
-      let hoursMonthly = netHourly > 0 ? (totalMonthly / netHourly) : 0;
-
-      tableHTML += `
-        <p><b>Hours Needed (Biweekly):</b> ${hoursBiweekly.toFixed(2)} hours</p>
-        <p><b>Hours Needed (Monthly):</b> ${hoursMonthly.toFixed(2)} hours</p>
-      `;
-
-      $('budgetResults').innerHTML = tableHTML;
-    }
-
-    // Download PDF
-    function downloadReport() {
-      const element = document.createElement('div');
-      element.innerHTML = `
-        <h1>Monthly Budgeting Report</h1>
-        ${$('incomeResults').innerHTML}
-        ${$('budgetResults').innerHTML}
-      `;
-
-      const opt = {
-        margin: 10,
-        filename: 'Budgeting_Report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
-      };
-
-      html2pdf().set(opt).from(element).save();
-    }
-
-    // Download CSV
-    function downloadCSV() {
-      let rows = [["Description", "Biweekly ($)", "Monthly ($)"]];
-      const descs = [...document.querySelectorAll('.desc')].map(el => el.value || 'Unnamed');
-      const amounts = [...document.querySelectorAll('.amount')].map(el => parseFloat(el.value) || 0);
-
-      amounts.forEach((amt, i) => {
-        rows.push([descs[i], amt.toFixed(2), (amt * 2).toFixed(2)]);
-      });
-
-      const totalBiweekly = amounts.reduce((a, b) => a + b, 0);
-      const totalMonthly = totalBiweekly * 2;
-      rows.push(["Total", totalBiweekly.toFixed(2), totalMonthly.toFixed(2)]);
-
-      const hourly = parseFloat($('hourlyPay').value) || 0;
-      const tax = (parseFloat($('taxPercent').value) || 0) / 100;
-      const netHourly = hourly * (1 - tax);
-      if (netHourly > 0) {
-        rows.push(["Hours Needed (Biweekly)", (totalBiweekly / netHourly).toFixed(2), ""]);
-        rows.push(["Hours Needed (Monthly)", (totalMonthly / netHourly).toFixed(2), ""]);
+      let biweeklyTotal = 0;
+      let rows = '';
+      for (let i = 0; i < amounts.length; i++) {
+        const name = names[i].value || "Expense " + (i+1);
+        const amount = parseFloat(amounts[i].value) || 0;
+        biweeklyTotal += amount;
+        rows += `<tr><td>${name}</td><td>$${amount.toFixed(2)}</td></tr>`;
       }
 
-      let csvContent = "data:text/csv;charset=utf-8," 
-        + rows.map(e => e.join(",")).join("\n");
+      const monthlyTotal = biweeklyTotal * 2;
+      const hoursNeeded = netPay > 0 && hoursPerWeek > 0 
+        ? (biweeklyTotal / (netPay / (hoursPerWeek*2))).toFixed(2) 
+        : 0;
 
-      const link = document.createElement("a");
-      link.setAttribute("href", encodeURI(csvContent));
-      link.setAttribute("download", "Budgeting_Report.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      document.getElementById('budgetResults').style.display = 'block';
+      document.getElementById('budgetResults').innerHTML = `
+        <h3>Budget Summary</h3>
+        <table>
+          <tr><th>Expense</th><th>Biweekly Amount</th></tr>
+          ${rows}
+          <tr><th>Total (Biweekly)</th><th>$${biweeklyTotal.toFixed(2)}</th></tr>
+          <tr><th>Total (Monthly)</th><th>$${monthlyTotal.toFixed(2)}</th></tr>
+        </table>
+        <p><b>Hours Needed to Cover Expenses:</b> ${hoursNeeded} hrs</p>
+      `;
     }
 
-    // Reset all fields
     function resetAll() {
-      $('hourlyPay').value = '';
-      $('hoursPerWeek').value = '';
-      $('taxPercent').value = '';
-      $('incomeResults').innerHTML = '';
-      $('budgetResults').innerHTML = '';
-      $('expenseList').innerHTML = '';
+      document.getElementById('hourlyPay').value = '';
+      document.getElementById('hoursPerWeek').value = '';
+      document.getElementById('taxRate').value = '';
+      document.getElementById('expenses').innerHTML = `
+        <div>
+          <input type="text" placeholder="Expense name (e.g., Rent)" class="expense-name" value="Rent">
+          <input type="number" placeholder="Amount ($)" class="expense-amount">
+        </div>
+        <div>
+          <input type="text" placeholder="Expense name (e.g., Utilities)" class="expense-name" value="Utilities">
+          <input type="number" placeholder="Amount ($)" class="expense-amount">
+        </div>
+        <div>
+          <input type="text" placeholder="Expense name (e.g., Other)" class="expense-name" value="Other">
+          <input type="number" placeholder="Amount ($)" class="expense-amount">
+        </div>
+      `;
+      document.getElementById('payResults').style.display = 'none';
+      document.getElementById('budgetResults').style.display = 'none';
+      grossPay = 0;
+      netPay = 0;
+      hoursPerWeek = 0;
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Biweekly Budgeting Calculator Results", 10, 10);
+      if (document.getElementById('payResults').style.display !== 'none') {
+        doc.text(document.getElementById('payResults').innerText, 10, 20);
+      }
+      if (document.getElementById('budgetResults').style.display !== 'none') {
+        doc.text(document.getElementById('budgetResults').innerText, 10, 60);
+      }
+      doc.save("budget_results.pdf");
+    }
+
+    function downloadCSV() {
+      let csv = "Expense,Biweekly Amount\n";
+      const names = document.getElementsByClassName('expense-name');
+      const amounts = document.getElementsByClassName('expense-amount');
+
+      for (let i = 0; i < amounts.length; i++) {
+        const name = names[i].value || "Expense " + (i+1);
+        const amount = parseFloat(amounts[i].value) || 0;
+        csv += `${name},${amount.toFixed(2)}\n`;
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "budget_results.csv";
+      link.click();
     }
   </script>
 </body>
