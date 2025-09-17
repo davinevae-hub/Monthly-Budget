@@ -135,8 +135,12 @@
       `;
     }
 
-    // Calculate budget and display as table
+    // Calculate budget and required hours
     function calculateBudget() {
+      const hourly = parseFloat($('hourlyPay').value) || 0;
+      const tax = (parseFloat($('taxPercent').value) || 0) / 100;
+      const netHourly = hourly * (1 - tax);
+
       const descs = [...document.querySelectorAll('.desc')].map(el => el.value || 'Unnamed');
       const amounts = [...document.querySelectorAll('.amount')].map(el => parseFloat(el.value) || 0);
       const totalBiweekly = amounts.reduce((a, b) => a + b, 0);
@@ -164,6 +168,15 @@
           <th>$${totalMonthly.toFixed(2)}</th>
         </tr>
         </table>
+      `;
+
+      // Calculate required work hours
+      let hoursBiweekly = netHourly > 0 ? (totalBiweekly / netHourly) : 0;
+      let hoursMonthly = netHourly > 0 ? (totalMonthly / netHourly) : 0;
+
+      tableHTML += `
+        <p><b>Hours Needed (Biweekly):</b> ${hoursBiweekly.toFixed(2)} hours</p>
+        <p><b>Hours Needed (Monthly):</b> ${hoursMonthly.toFixed(2)} hours</p>
       `;
 
       $('budgetResults').innerHTML = tableHTML;
@@ -202,6 +215,14 @@
       const totalBiweekly = amounts.reduce((a, b) => a + b, 0);
       const totalMonthly = totalBiweekly * 2;
       rows.push(["Total", totalBiweekly.toFixed(2), totalMonthly.toFixed(2)]);
+
+      const hourly = parseFloat($('hourlyPay').value) || 0;
+      const tax = (parseFloat($('taxPercent').value) || 0) / 100;
+      const netHourly = hourly * (1 - tax);
+      if (netHourly > 0) {
+        rows.push(["Hours Needed (Biweekly)", (totalBiweekly / netHourly).toFixed(2), ""]);
+        rows.push(["Hours Needed (Monthly)", (totalMonthly / netHourly).toFixed(2), ""]);
+      }
 
       let csvContent = "data:text/csv;charset=utf-8," 
         + rows.map(e => e.join(",")).join("\n");
